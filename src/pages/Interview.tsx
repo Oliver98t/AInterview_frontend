@@ -25,7 +25,21 @@ import {
   pollForResponse,
 } from "../services/api";
 
-const INTERVIEW_QUESTIONS = [
+interface InterviewQuestion {
+  id: number;
+  category: string;
+  question: string;
+}
+
+type ChipColor =
+  | "primary"
+  | "secondary"
+  | "warning"
+  | "success"
+  | "default"
+  | "danger";
+
+const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
     id: 1,
     category: "Behavioural",
@@ -75,7 +89,7 @@ const INTERVIEW_QUESTIONS = [
   },
 ];
 
-const CATEGORY_COLORS = {
+const CATEGORY_COLORS: Record<string, ChipColor> = {
   Behavioural: "primary",
   Technical: "secondary",
   Situational: "warning",
@@ -93,14 +107,15 @@ const STEP_RESULT = 4;
 export default function Interview() {
   const [step, setStep] = useState(STEP_USERNAME);
   const [username, setUsername] = useState("");
-  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [selectedQuestion, setSelectedQuestion] =
+    useState<InterviewQuestion | null>(null);
   const [aiResponse, setAiResponse] = useState("");
   const [transcription, setTranscription] = useState("");
   const [jobId, setJobId] = useState("");
   const [processingStatus, setProcessingStatus] = useState("");
   const [processingProgress, setProcessingProgress] = useState(0);
   const [submitError, setSubmitError] = useState("");
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpenChange } = useDisclosure();
 
   const {
     isRecording,
@@ -119,7 +134,7 @@ export default function Interview() {
   }, [username]);
 
   const handleSelectQuestion = useCallback(
-    (q) => {
+    (q: InterviewQuestion) => {
       setSelectedQuestion(q);
       resetRecording();
       setAiResponse("");
@@ -163,7 +178,7 @@ export default function Interview() {
 
       setStep(STEP_RESULT);
     } catch (err) {
-      setSubmitError(err.message);
+      setSubmitError((err as Error).message);
       setStep(STEP_RECORD);
     }
   }, [audioBlob, username]);
@@ -275,7 +290,7 @@ export default function Interview() {
                 <Chip
                   size="sm"
                   variant="flat"
-                  color={CATEGORY_COLORS[q.category] || "default"}
+                  color={CATEGORY_COLORS[q.category] ?? "default"}
                   className="w-fit text-xs font-medium"
                 >
                   {q.category}
@@ -320,7 +335,8 @@ export default function Interview() {
                   size="sm"
                   variant="flat"
                   color={
-                    CATEGORY_COLORS[selectedQuestion?.category] || "default"
+                    CATEGORY_COLORS[selectedQuestion?.category ?? ""] ??
+                    "default"
                   }
                   className="mb-2 text-xs"
                 >
@@ -490,7 +506,14 @@ export default function Interview() {
         <div className="w-full max-w-md text-center">
           <Card className="card-glass border-white/[0.08]" shadow="none">
             <CardBody className="px-8 py-12 flex flex-col items-center gap-6">
-              <Spinner size="lg" color="primary" classNames={{ circle1: "border-b-primary", circle2: "border-b-primary/30" }} />
+              <Spinner
+                size="lg"
+                color="primary"
+                classNames={{
+                  circle1: "border-b-primary",
+                  circle2: "border-b-primary/30",
+                }}
+              />
               <div>
                 <h3 className="text-xl font-semibold mb-1">Processing…</h3>
                 <p className="text-default-400 text-sm">{processingStatus}</p>
@@ -499,7 +522,9 @@ export default function Interview() {
                 value={processingProgress}
                 color="primary"
                 className="w-full"
-                classNames={{ indicator: "bg-gradient-to-r from-primary to-secondary" }}
+                classNames={{
+                  indicator: "bg-gradient-to-r from-primary to-secondary",
+                }}
               />
               <p className="text-xs text-default-500">
                 This can take 20–60 seconds while AWS Transcribe processes your
@@ -618,6 +643,21 @@ export default function Interview() {
             Re-attempt Same Question
           </Button>
         </div>
+
+        {/* Hidden modal placeholder (useDisclosure kept for future use) */}
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+          <ModalContent>
+            {(onClose) => (
+              <>
+                <ModalHeader>Info</ModalHeader>
+                <ModalBody />
+                <ModalFooter>
+                  <Button onPress={onClose}>Close</Button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
       </div>
     );
   }

@@ -12,16 +12,21 @@ import {
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+interface NavLink {
+  label: string;
+  href: string;
+}
+
+const navLinks: NavLink[] = [
+  { label: "Home", href: "/" },
+  { label: "Interview", href: "/interview" },
+  { label: "Settings", href: "/settings" },
+];
+
 export default function AppNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
-  const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Interview", href: "/interview" },
-    { label: "Settings", href: "/settings" },
-  ];
 
   return (
     <Navbar

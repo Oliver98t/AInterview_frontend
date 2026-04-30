@@ -1,9 +1,26 @@
 import axios from "axios";
 
+interface Config {
+  speechToTextUrl: string;
+  getResponseUrl: string;
+  s3PresignedUrl: string;
+  awsRegion: string;
+}
+
+export interface TranscriptionResult {
+  jobId: string;
+  transcription: string;
+}
+
+export interface PollOptions {
+  pollIntervalMs?: number;
+  maxAttempts?: number;
+}
+
 /**
  * Retrieve settings from localStorage with fallbacks.
  */
-function getConfig() {
+function getConfig(): Config {
   return {
     speechToTextUrl: localStorage.getItem("ainterview_stt_url") || "",
     getResponseUrl: localStorage.getItem("ainterview_get_response_url") || "",
@@ -16,11 +33,11 @@ function getConfig() {
  * Upload audio blob to S3 using a presigned PUT URL.
  * The presigned URL must be generated externally (e.g. via AWS CLI or a
  * backend endpoint) and saved in Settings.
- *
- * @param {Blob} audioBlob  The recorded audio blob
- * @param {string} presignedUrl  Pre-generated S3 presigned PUT URL
  */
-export async function uploadAudioToS3(audioBlob, presignedUrl) {
+export async function uploadAudioToS3(
+  audioBlob: Blob,
+  presignedUrl: string
+): Promise<void> {
   if (!presignedUrl) {
     throw new Error(
       "No S3 presigned URL configured. Add one in Settings to enable audio upload."
@@ -34,40 +51,31 @@ export async function uploadAudioToS3(audioBlob, presignedUrl) {
 /**
  * Call the speech_to_text Lambda Function URL.
  * Returns { jobId, transcription }.
- *
- * Note: Lambda Function URLs are configured with authorization_type = "AWS_IAM".
- * For local testing / demo purposes you may temporarily set
- * authorization_type = "NONE" in your Terraform config.
- *
- * @param {string} username
  */
-export async function startTranscription(username) {
+export async function startTranscription(
+  username: string
+): Promise<TranscriptionResult> {
   const { speechToTextUrl } = getConfig();
   if (!speechToTextUrl) {
     throw new Error(
       "Speech-to-Text Lambda URL not configured. Add it in Settings."
     );
   }
-  const response = await axios.get(speechToTextUrl, {
+  const response = await axios.get<TranscriptionResult>(speechToTextUrl, {
     params: { user: username },
-    timeout: 120_000, // transcription can take a while
+    timeout: 120_000,
   });
-  return response.data; // { jobId, transcription }
+  return response.data;
 }
 
 /**
  * Poll the get_response Lambda Function URL until a response is available.
  * Returns the AI response string.
- *
- * @param {string} jobId
- * @param {object} options
- * @param {number} [options.pollIntervalMs=3000]
- * @param {number} [options.maxAttempts=20]
  */
 export async function pollForResponse(
-  jobId,
-  { pollIntervalMs = 3000, maxAttempts = 20 } = {}
-) {
+  jobId: string,
+  { pollIntervalMs = 3000, maxAttempts = 20 }: PollOptions = {}
+): Promise<string> {
   const { getResponseUrl } = getConfig();
   if (!getResponseUrl) {
     throw new Error(
@@ -76,9 +84,9 @@ export async function pollForResponse(
   }
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    await new Promise((r) => setTimeout(r, pollIntervalMs));
+    await new Promise<void>((r) => setTimeout(r, pollIntervalMs));
     try {
-      const resp = await axios.get(getResponseUrl, {
+      const resp = await axios.get<{ response?: string }>(getResponseUrl, {
         params: { jobId },
         timeout: 15_000,
       });

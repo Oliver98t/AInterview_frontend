@@ -1,20 +1,32 @@
 import { useState, useRef, useCallback } from "react";
 
+export interface UseAudioRecorderReturn {
+  isRecording: boolean;
+  audioBlob: Blob | null;
+  audioUrl: string | null;
+  elapsedSeconds: number;
+  formattedTime: string;
+  error: string | null;
+  startRecording: () => Promise<void>;
+  stopRecording: () => void;
+  resetRecording: () => void;
+}
+
 /**
  * Hook that wraps the MediaRecorder API for in-browser audio recording.
  * Produces a Blob on stop and exposes recording state / timer.
  */
-export default function useAudioRecorder() {
+export default function useAudioRecorder(): UseAudioRecorderReturn {
   const [isRecording, setIsRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState(null);
-  const [audioUrl, setAudioUrl] = useState(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const mediaRecorderRef = useRef(null);
-  const chunksRef = useRef([]);
-  const timerRef = useRef(null);
-  const streamRef = useRef(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startRecording = useCallback(async () => {
     setError(null);
@@ -36,7 +48,7 @@ export default function useAudioRecorder() {
       mediaRecorderRef.current = recorder;
       chunksRef.current = [];
 
-      recorder.ondataavailable = (e) => {
+      recorder.ondataavailable = (e: BlobEvent) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
       };
 
@@ -56,10 +68,11 @@ export default function useAudioRecorder() {
         setElapsedSeconds((s) => s + 1);
       }, 1000);
     } catch (err) {
+      const domError = err as DOMException;
       setError(
-        err.name === "NotAllowedError"
+        domError.name === "NotAllowedError"
           ? "Microphone access denied. Please allow microphone permissions and try again."
-          : `Could not start recording: ${err.message}`
+          : `Could not start recording: ${domError.message}`
       );
     }
   }, []);
@@ -68,7 +81,7 @@ export default function useAudioRecorder() {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      clearInterval(timerRef.current);
+      if (timerRef.current !== null) clearInterval(timerRef.current);
     }
   }, [isRecording]);
 

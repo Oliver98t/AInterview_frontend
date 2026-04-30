@@ -8,8 +8,6 @@ import {
   Divider,
   Chip,
   Link,
-  Switch,
-  Tooltip,
 } from "@heroui/react";
 
 const SETTINGS_KEYS = {
@@ -17,7 +15,31 @@ const SETTINGS_KEYS = {
   getResponseUrl: "ainterview_get_response_url",
   s3PresignedUrl: "ainterview_s3_presigned_url",
   awsRegion: "ainterview_aws_region",
-};
+} as const;
+
+interface QuickRefItem {
+  label: string;
+  cmd: string;
+}
+
+const quickRefItems: QuickRefItem[] = [
+  {
+    label: "Get Lambda URL (Terraform output)",
+    cmd: "terraform output speech_to_text_function_url",
+  },
+  {
+    label: "Generate S3 presigned URL",
+    cmd: "aws s3 presign s3://<bucket>/uploads/<user>.flac --expires-in 3600",
+  },
+  {
+    label: "Disable IAM auth (dev only)",
+    cmd: 'authorization_type = "NONE"',
+  },
+  {
+    label: "Run backend locally",
+    cmd: "docker-compose up",
+  },
+];
 
 export default function Settings() {
   const [sttUrl, setSttUrl] = useState("");
@@ -29,11 +51,13 @@ export default function Settings() {
   // Load persisted settings on mount
   useEffect(() => {
     setSttUrl(localStorage.getItem(SETTINGS_KEYS.sttUrl) || "");
-    setGetResponseUrl(localStorage.getItem(SETTINGS_KEYS.getResponseUrl) || "");
-    setS3PresignedUrl(localStorage.getItem(SETTINGS_KEYS.s3PresignedUrl) || "");
-    setAwsRegion(
-      localStorage.getItem(SETTINGS_KEYS.awsRegion) || "eu-west-2"
+    setGetResponseUrl(
+      localStorage.getItem(SETTINGS_KEYS.getResponseUrl) || ""
     );
+    setS3PresignedUrl(
+      localStorage.getItem(SETTINGS_KEYS.s3PresignedUrl) || ""
+    );
+    setAwsRegion(localStorage.getItem(SETTINGS_KEYS.awsRegion) || "eu-west-2");
   }, []);
 
   const handleSave = () => {
@@ -257,24 +281,7 @@ export default function Settings() {
           Quick Reference
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-default-500">
-          {[
-            {
-              label: "Get Lambda URL (Terraform output)",
-              cmd: "terraform output speech_to_text_function_url",
-            },
-            {
-              label: "Generate S3 presigned URL",
-              cmd: "aws s3 presign s3://<bucket>/uploads/<user>.flac --expires-in 3600",
-            },
-            {
-              label: "Disable IAM auth (dev only)",
-              cmd: 'authorization_type = "NONE"',
-            },
-            {
-              label: "Run backend locally",
-              cmd: "docker-compose up",
-            },
-          ].map((item) => (
+          {quickRefItems.map((item) => (
             <Card
               key={item.label}
               className="card-glass border-white/[0.04]"
@@ -299,6 +306,12 @@ export default function Settings() {
           >
             View the backend repository →
           </Link>
+        </p>
+
+        <p className="text-xs text-default-600 mt-2 text-center">
+          <Chip size="sm" variant="flat" color="default" className="text-xs">
+            v0.1.0
+          </Chip>
         </p>
       </div>
     </div>

@@ -1,7 +1,19 @@
 import { Button, Card, CardBody, Chip, Link } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
 
-const features = [
+interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface Step {
+  number: string;
+  title: string;
+  description: string;
+}
+
+const features: Feature[] = [
   {
     icon: "🎙️",
     title: "Voice Recording",
@@ -28,7 +40,7 @@ const features = [
   },
 ];
 
-const steps = [
+const steps: Step[] = [
   {
     number: "01",
     title: "Choose a Question",
@@ -123,7 +135,7 @@ export default function Home() {
                 <div className="w-3 h-3 rounded-full bg-success/70" />
               </div>
               <span className="text-default-500 text-sm font-mono">
-                interview-session.jsx
+                interview-session.tsx
               </span>
             </div>
             <div className="space-y-3">
@@ -224,7 +236,7 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
           {/* Connecting line (desktop) */}
           <div className="hidden lg:block absolute top-8 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-          {steps.map((step, idx) => (
+          {steps.map((step) => (
             <div key={step.number} className="relative text-center">
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 border border-primary/20 flex items-center justify-center mx-auto mb-4 text-2xl font-black text-primary">
                 {step.number}

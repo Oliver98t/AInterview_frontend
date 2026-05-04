@@ -80,17 +80,6 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
-        <div className="inline-flex mb-6">
-          <Chip
-            variant="flat"
-            color="primary"
-            size="sm"
-            className="font-medium bg-primary/10 text-primary border border-primary/20 px-3"
-            startContent={<span className="text-xs">✦</span>}
-          >
-            Powered by AWS Bedrock &amp; Amazon Transcribe
-          </Chip>
-        </div>
 
         <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 tracking-tight leading-none">
           Ace your next
@@ -100,8 +89,8 @@ export default function Home() {
 
         <p className="text-lg sm:text-xl text-default-400 max-w-2xl mx-auto mb-10 leading-relaxed">
           Record spoken answers to interview questions and receive instant,
-          detailed feedback powered by Amazon Bedrock. Practice at your own pace
-          and build real confidence.
+          detailed feedback powered AI. Practice at your own pace
+          and build real confidence with ANY interview.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -113,15 +102,6 @@ export default function Home() {
             onPress={() => navigate("/interview")}
           >
             Start Practising →
-          </Button>
-          <Button
-            size="lg"
-            variant="bordered"
-            className="font-semibold px-10 text-base border-white/10 text-default-300 hover:bg-white/5"
-            as={Link}
-            href="/settings"
-          >
-            Configure API
           </Button>
         </div>
 
@@ -250,54 +230,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative max-w-6xl mx-auto px-6 py-20 mb-10">
-        <div className="card-glass rounded-3xl p-12 text-center border-primary/10 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-3xl" />
-          <div className="relative z-10">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Ready to practise?
-            </h2>
-            <p className="text-default-400 max-w-lg mx-auto mb-8">
-              Start a session now. Don&apos;t forget to add your Lambda Function
-              URLs in Settings before your first run.
-            </p>
-            <div className="flex gap-4 justify-center flex-wrap">
-              <Button
-                size="lg"
-                color="primary"
-                variant="shadow"
-                className="font-bold px-10 glow-primary"
-                onPress={() => navigate("/interview")}
-              >
-                Start Interview
-              </Button>
-              <Button
-                size="lg"
-                variant="flat"
-                color="primary"
-                className="font-semibold px-10"
-                onPress={() => navigate("/settings")}
-              >
-                Configure Settings
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="border-t border-white/[0.06] py-8">
         <div className="max-w-6xl mx-auto px-6 text-center text-default-500 text-sm">
           <p>
-            AInterview Frontend ·{" "}
-            <Link
-              href="https://github.com/Oliver98t/AInterview_backend"
-              isExternal
-              className="text-primary/70 hover:text-primary text-sm"
-            >
-              View Backend on GitHub
-            </Link>
+            AInterview Frontend V 1.0, created by Oliver Tattersfield
           </p>
         </div>
       </footer>

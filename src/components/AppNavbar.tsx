@@ -72,22 +72,6 @@ export default function AppNavbar() {
         ))}
       </NavbarContent>
 
-      {/* CTA button */}
-      <NavbarContent justify="end">
-        <NavbarItem>
-          <Button
-            as={Link}
-            href="/interview"
-            color="primary"
-            variant="shadow"
-            size="sm"
-            className="font-semibold hidden sm:flex"
-          >
-            Start Interview
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-
       {/* Mobile menu */}
       <NavbarMenu className="bg-[#0d0d14]/95 backdrop-blur-xl pt-6 gap-2">
         {navLinks.map((link) => (
@@ -105,18 +89,6 @@ export default function AppNavbar() {
             </Link>
           </NavbarMenuItem>
         ))}
-        <NavbarMenuItem className="mt-4">
-          <Button
-            as={Link}
-            href="/interview"
-            color="primary"
-            variant="shadow"
-            className="w-full font-semibold"
-            onPress={() => setIsMenuOpen(false)}
-          >
-            Start Interview
-          </Button>
-        </NavbarMenuItem>
       </NavbarMenu>
     </Navbar>
   );

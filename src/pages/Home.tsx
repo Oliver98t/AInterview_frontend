@@ -186,7 +186,7 @@ export default function Home() {
           {features.map((f) => (
             <Card
               key={f.title}
-              className="card-glass border-white/[0.06] hover:border-primary/30 transition-colors group"
+              className="card-glass border-white/[0.06] hover:border-primary/30 transition-colors group rounded-2xl"
               shadow="none"
             >
               <CardBody className="p-6 gap-3">

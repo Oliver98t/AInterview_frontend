@@ -24,6 +24,11 @@ import {
   sendTranscript
 } from "../services/api";
 
+// TODO create basic text question/answer section
+// TODO implement feedback assessment (finishe interview button) 
+
+const responseArr: string[] = [];
+
 // Step indices
 const STEP_USERNAME = 0;
 const STEP_CONTEXT = 1;
@@ -46,24 +51,51 @@ function AIResponse({input}: AIResponseProps) {
 }
 
 interface ReplyProps {
-  input: string
+  initialValue?: string;
+  onSubmit?: (value: string) => void;
 }
 
-function Reply({input}: ReplyProps) {
-  return(
+function Reply({ initialValue = "", onSubmit }: ReplyProps) {
+  const [value, setValue] = useState(initialValue);
+
+  const handleInputChange = (val: string) => {
+    setValue(val);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && onSubmit) {
+      onSubmit(value);
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (onSubmit) {
+      onSubmit(value);
+    }
+  };
+
+  return (
     <div className="card-glass border-white/[0.06] hover:border-primary/30 transition-colors group bg-primary/20 rounded-2xl p-2 w-full">
-      <Input
-      placeholder="Type your answer or notes here..."
-      variant="flat"
-      classNames={{
-        inputWrapper:
-          "bg-transparent border-none shadow-none outline-none ring-0 focus:outline-none focus:ring-0 focus:border-none focus:shadow-none active:outline-none active:ring-0 active:border-none active:shadow-none",
-        input:
-          "bg-transparent border-none outline-none ring-0 shadow-none focus:outline-none focus:ring-0 focus:border-none focus:shadow-none active:outline-none active:ring-0 active:border-none active:shadow-none text-default-900",
-      }}
-      // value and onValueChange can be added for state if needed
-      autoFocus={false}
-      />
+      <div className="flex items-center gap-2 w-full">
+        <Input
+          placeholder="Type your answer or notes here..."
+          variant="flat"
+          classNames={{
+            inputWrapper:
+              "bg-transparent border-none shadow-none outline-none ring-0 focus:outline-none focus:ring-0 focus:border-none focus:shadow-none active:outline-none active:ring-0 active:border-none active:shadow-none",
+            input:
+              "bg-transparent border-none outline-none ring-0 shadow-none focus:outline-none focus:ring-0 focus:border-none focus:shadow-none active:outline-none active:ring-0 active:border-none active:shadow-none text-default-900",
+          }}
+          value={value}
+          onValueChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          autoFocus={false}
+          className="flex-1"
+        />
+        <Button size="sm" onClick={handleButtonClick}>
+          Submit
+        </Button>
+      </div>
     </div>
   );
 }
@@ -83,6 +115,7 @@ export default function Interview() {
     const prompt = `give a singular interview question for the following background (include just the question for an AI chat window): ${context}`
     const res = await sendTranscript("test", prompt)
     setAiResponse(res.response);
+    responseArr.push(res.response);
     setStep(STEP_QUESTION);
   }, [context]);
 
@@ -200,18 +233,21 @@ export default function Interview() {
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4">
         <div className="w-full max-w-2xl mx-auto px-6 py-12 flex flex-col gap-6">
           <div className="flex flex-col gap-4">
-            <AIResponse 
-              input={aiResponse}
-            />
+            
             
 
      
             
             <div className="flex justify-end">
               <div className="w-full max-w-[90%]">
-                <Reply input="test"/>
+                <Reply onSubmit={(val) => {console.log("Reply submitted:", val)
+                    responseArr.push(val);
+                    console.log(responseArr);
+                }
+                } />
               </div>
             </div>
+            
           </div>
         </div>
       </div>

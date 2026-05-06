@@ -1,13 +1,13 @@
 import { AwsClient } from "aws4fetch";
 
 const aws = new AwsClient({
-  accessKeyId: "",//import.meta.env.VITE_AWS_ACCESS_KEY_ID,
-  secretAccessKey: "",//import.meta.env.VITE_AWS_SECRET_ACCESS_KEY,
-  region: "eu-west-2",
-  service: "lambda", // or "execute-api" for API Gateway
+  accessKeyId:      import.meta.env.VITE_AWS_ACCESS_KEY_ID as string,
+  secretAccessKey:  import.meta.env.VITE_AWS_SECRET_ACCESS_KEY as string,
+  region:           "eu-west-2",
+  service:          "lambda",
 });
 
-const responseUrl: string = "https://oqan7u4aa6julpktfzyhe2ylpu0odoij.lambda-url.eu-west-2.on.aws/";
+const responseUrl = import.meta.env.VITE_RESPONSE_DEV_URL as string;
 
 export async function sendTranscript(user: string, transcript: string) {
   const url = `${responseUrl}?user=${encodeURIComponent(user)}&transcript=${encodeURIComponent(transcript)}`;

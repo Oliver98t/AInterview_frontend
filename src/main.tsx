@@ -6,7 +6,7 @@ import App from "./App";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
+  
     <BrowserRouter>
       <HeroUIProvider>
         <main className="dark text-foreground bg-background min-h-screen">
@@ -14,5 +14,5 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         </main>
       </HeroUIProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  
 );

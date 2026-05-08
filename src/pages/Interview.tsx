@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Button,
   Card,
@@ -24,10 +24,9 @@ import {
   sendTranscript
 } from "../services/api";
 
-// TODO create basic text question/answer section
-// TODO implement feedback assessment (finishe interview button) 
+// TODO implement feedback assessment (finish interview button) 
 
-const responseArr: string[] = [];
+type message = Record<string, string>;
 
 // Step indices
 const STEP_USERNAME = 0;
@@ -36,18 +35,6 @@ const STEP_QUESTION = 2;
 
 interface AIResponseProps {
   input: string
-}
-
-function AIResponse({input}: AIResponseProps) {
-  return(
-  <div className="flex justify-start">
-    <div className="card-glass border-white/[0.06] hover:border-primary/30 transition-colors group bg-transparent rounded-2xl p-6 min-h-[80px] max-w-[90%] w-full">
-      <span className="text-default-400 break-words">
-        {input || "Your AI response will appear here."}
-      </span>
-    </div>
-  </div>
-  );
 }
 
 interface ReplyProps {
@@ -65,12 +52,14 @@ function Reply({ initialValue = "", onSubmit }: ReplyProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && onSubmit) {
       onSubmit(value);
+      setValue("");
     }
   };
 
   const handleButtonClick = () => {
     if (onSubmit) {
       onSubmit(value);
+      setValue("");
     }
   };
 
@@ -101,23 +90,52 @@ function Reply({ initialValue = "", onSubmit }: ReplyProps) {
 }
 
 export default function Interview() {
-  const [step, setStep] = useState(STEP_CONTEXT);
+  const [messages, setMessages] = useState<message[]>([]);
+  const [step, setStep] = useState(STEP_QUESTION);
   const [username, setUsername] = useState("");
-  const [context, setContext] = useState("");
+  const [context, setContext] = useState("python dev");
   const [aiResponse, setAiResponse] = useState("");
-  
+  let currentAnswer: string = "";
+
+  // inside your component:
+  useEffect(() => {
+    handleContextSubmit();
+  }, []);
+
   const handleUsernameSubmit = useCallback(() => {
     if (username.trim().length < 2) return;
     setStep(STEP_CONTEXT);
   }, [username]);
 
   const handleContextSubmit = useCallback(async () => {
-    const prompt = `give a singular interview question for the following background (include just the question for an AI chat window): ${context}`
-    const res = await sendTranscript("test", prompt)
-    setAiResponse(res.response);
-    responseArr.push(res.response);
+    const prompt = `give just an interview question and answer in a json object string like {question: , answer:} 
+                    for a ${context}, give just the object string and nothing else no mark down etc`
+    const res = await sendTranscript("test", prompt);
+    const parsedResponse = JSON.parse(res.response);
+    currentAnswer = parsedResponse.answer;
+    setMessages(prev => [...prev, { role: "ai", text: parsedResponse.question }]);
     setStep(STEP_QUESTION);
   }, [context]);
+
+  const handleQuestionSubmit = async () => {
+    const prompt = `give just an interview question and answer in a json object string like {question: , answer:} 
+                    for a ${context}, give just the object string and nothing else no mark down etc`
+    const res = await sendTranscript("test", prompt);
+    const parsedResponse = JSON.parse(res.response);
+    currentAnswer = parsedResponse.answer;
+    setMessages(prev => [...prev, { role: "ai", text: parsedResponse.question }]);
+  };
+
+  const handleAnswerSubmit = async (answer: string) => {
+    console.log(messages[messages.length - 1]);
+    const outputFormat = "give just the score, no markdown etc";
+    const checkAnswer = `output a number score out of 10 for this answer and nothing else: ${answer}\nbased on this question: ${messages[messages.length - 1].text}\n`
+    //const newPrompt = `${checkAnswer}\ngive just an interview question and answer in json format like {question: , answer:}`;
+    const res = await sendTranscript("test", checkAnswer);
+    console.log(res.response);
+    setMessages(prev => [...prev, { role: "user", text: answer }]);
+    await handleQuestionSubmit()
+  };
 
   const handleRestart = useCallback(() => {
     setAiResponse("");
@@ -228,31 +246,45 @@ export default function Interview() {
   }
 
   // --- Step: set context of interview ---
-  if (step === STEP_QUESTION) {
+  if (step === STEP_QUESTION) {   
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4">
         <div className="w-full max-w-2xl mx-auto px-6 py-12 flex flex-col gap-6">
           <div className="flex flex-col gap-4">
-            
-            
-
-     
-            
+            <ScrollShadow className="flex flex-col gap-4 h-[400px] overflow-y-auto">
+              {messages.map((message, i) => {
+                if (message.role === "ai") {
+                  return (
+                    <div key={i} className="flex justify-start">
+                      <div className="card-glass border-white/[0.06] rounded-2xl p-2">
+                        {message.text}
+                      </div>
+                    </div>
+                  );
+                }
+                else if (message.role === "user") {
+                  return (
+                    <div key={i} className="flex justify-end">
+                      <div className="card-glass border-white/[0.06] rounded-2xl p-2">
+                        {message.text}
+                      </div>
+                    </div>
+                  );
+                }
+              })}
+            </ScrollShadow>
             <div className="flex justify-end">
               <div className="w-full max-w-[90%]">
-                <Reply onSubmit={(val) => {console.log("Reply submitted:", val)
-                    responseArr.push(val);
-                    console.log(responseArr);
-                }
+                <Reply onSubmit={(input) => {
+                    handleAnswerSubmit(input);
+                  }
                 } />
               </div>
             </div>
-            
           </div>
         </div>
       </div>
     );
   }
-
   return null;
 }

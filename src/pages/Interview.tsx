@@ -26,6 +26,8 @@ import {
 
 // TODO implement feedback assessment (finish interview button)
 
+const LOCAL_TEST = import.meta.env.VITE_LOCAL_TEST as boolean;
+
 type message = Record<string, string>;
 
 // Step indices
@@ -88,7 +90,7 @@ function Reply({ initialValue = "", onSubmit }: ReplyProps) {
 export default function Interview() {
   const [messages, setMessages] = useState<message[]>([]);
   const [step, setStep] = useState(STEP_QUESTION);
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("test");
   const [context, setContext] = useState("Python dev");
   const [aiResponse, setAiResponse] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -120,7 +122,7 @@ export default function Interview() {
     const prompt = `check the history and give just an interview question and answer in a json object string like {question: , answer:} 
                     for a ${context}, give just the object string and nothing else no mark down etc`
     setIsLoading(true);
-    const res = await sendTranscript("test", prompt);
+    const res = await sendTranscript(username, prompt);
     const parsedResponse = JSON.parse(res.response);
     currentAnswer = parsedResponse.answer;
     setMessages(prev => [...prev, { role: "ai", text: parsedResponse.question }]);
@@ -129,12 +131,11 @@ export default function Interview() {
 
   const handleAnswerSubmit = async (answer: string) => {
     console.log(messages[messages.length - 1]);
-    const outputFormat = "give just the score, no markdown etc";
     const checkAnswer =   `based on this question: ${messages[messages.length - 1].text}\n
                            and this answer: ${answer}\n
                            output a score out of 10 and reason on a json object in the format {score: , reason: }
                            give just the object string and nothing else no mark down etc`
-    const res = await sendTranscript("test", checkAnswer);
+    const res = await sendTranscript(username, checkAnswer);
     console.log(res.response);
     setMessages(prev => [...prev, { role: "user", text: answer }]);
     await handleQuestionSubmit()
@@ -260,7 +261,7 @@ export default function Interview() {
                   return (
                     <div key={i} className="flex flex-col items-start gap-1">
                       <span className="text-xs text-default-400 px-1 ">AI</span>
-                      <div className="card-glass border-white/[0.06] rounded-2xl p-2">
+                      <div className="rounded-2xl p-2 bg-primary text-white backdrop-blur-sm">
                         {message.text}
                       </div>
                     </div>

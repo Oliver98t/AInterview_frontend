@@ -24,7 +24,7 @@ import {
   sendTranscript
 } from "../services/api";
 
-// TODO implement feedback assessment (finish interview button) 
+// TODO implement feedback assessment (finish interview button)
 
 type message = Record<string, string>;
 
@@ -32,10 +32,6 @@ type message = Record<string, string>;
 const STEP_USERNAME = 0;
 const STEP_CONTEXT = 1;
 const STEP_QUESTION = 2;
-
-interface AIResponseProps {
-  input: string
-}
 
 interface ReplyProps {
   initialValue?: string;
@@ -93,8 +89,9 @@ export default function Interview() {
   const [messages, setMessages] = useState<message[]>([]);
   const [step, setStep] = useState(STEP_QUESTION);
   const [username, setUsername] = useState("");
-  const [context, setContext] = useState("python dev");
+  const [context, setContext] = useState("Python dev");
   const [aiResponse, setAiResponse] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   let currentAnswer: string = "";
 
   // inside your component:
@@ -110,27 +107,33 @@ export default function Interview() {
   const handleContextSubmit = useCallback(async () => {
     const prompt = `give just an interview question and answer in a json object string like {question: , answer:} 
                     for a ${context}, give just the object string and nothing else no mark down etc`
+    setIsLoading(true);
     const res = await sendTranscript("test", prompt);
     const parsedResponse = JSON.parse(res.response);
     currentAnswer = parsedResponse.answer;
     setMessages(prev => [...prev, { role: "ai", text: parsedResponse.question }]);
+    setIsLoading(false);
     setStep(STEP_QUESTION);
   }, [context]);
 
   const handleQuestionSubmit = async () => {
-    const prompt = `give just an interview question and answer in a json object string like {question: , answer:} 
+    const prompt = `check the history and give just an interview question and answer in a json object string like {question: , answer:} 
                     for a ${context}, give just the object string and nothing else no mark down etc`
+    setIsLoading(true);
     const res = await sendTranscript("test", prompt);
     const parsedResponse = JSON.parse(res.response);
     currentAnswer = parsedResponse.answer;
     setMessages(prev => [...prev, { role: "ai", text: parsedResponse.question }]);
+    setIsLoading(false);
   };
 
   const handleAnswerSubmit = async (answer: string) => {
     console.log(messages[messages.length - 1]);
     const outputFormat = "give just the score, no markdown etc";
-    const checkAnswer = `output a number score out of 10 for this answer and nothing else: ${answer}\nbased on this question: ${messages[messages.length - 1].text}\n`
-    //const newPrompt = `${checkAnswer}\ngive just an interview question and answer in json format like {question: , answer:}`;
+    const checkAnswer =   `based on this question: ${messages[messages.length - 1].text}\n
+                           and this answer: ${answer}\n
+                           output a score out of 10 and reason on a json object in the format {score: , reason: }
+                           give just the object string and nothing else no mark down etc`
     const res = await sendTranscript("test", checkAnswer);
     console.log(res.response);
     setMessages(prev => [...prev, { role: "user", text: answer }]);
@@ -255,7 +258,8 @@ export default function Interview() {
               {messages.map((message, i) => {
                 if (message.role === "ai") {
                   return (
-                    <div key={i} className="flex justify-start">
+                    <div key={i} className="flex flex-col items-start gap-1">
+                      <span className="text-xs text-default-400 px-1 ">AI</span>
                       <div className="card-glass border-white/[0.06] rounded-2xl p-2">
                         {message.text}
                       </div>
@@ -264,7 +268,8 @@ export default function Interview() {
                 }
                 else if (message.role === "user") {
                   return (
-                    <div key={i} className="flex justify-end">
+                    <div key={i} className="flex flex-col items-end gap-1">
+                      <span className="text-xs text-default-400 px-1">You</span>
                       <div className="card-glass border-white/[0.06] rounded-2xl p-2">
                         {message.text}
                       </div>
@@ -272,9 +277,18 @@ export default function Interview() {
                   );
                 }
               })}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="card-glass border-white/[0.06] rounded-2xl px-4 py-3 flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-default-400 animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-2 h-2 rounded-full bg-default-400 animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-2 h-2 rounded-full bg-default-400 animate-bounce" />
+                  </div>
+                </div>
+              )}
             </ScrollShadow>
             <div className="flex justify-end">
-              <div className="w-full max-w-[90%]">
+              <div className="w-full">
                 <Reply onSubmit={(input) => {
                     handleAnswerSubmit(input);
                   }

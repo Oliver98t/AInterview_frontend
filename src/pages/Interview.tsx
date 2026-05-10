@@ -21,7 +21,7 @@ import {
 } from "@heroui/react";
 import useAudioRecorder from "../hooks/useAudioRecorder";
 import {
-  sendTranscript
+  sendResponse
 } from "../services/api";
 
 // TODO implement feedback assessment (finish interview button)
@@ -110,7 +110,7 @@ export default function Interview() {
     const prompt = `give just an interview question and answer in a json object string like {question: , answer:} 
                     for a ${context}, give just the object string and nothing else no mark down etc`
     setIsLoading(true);
-    const res = await sendTranscript("test", prompt);
+    const res = await sendResponse("test", prompt);
     const parsedResponse = JSON.parse(res.response);
     currentAnswer = parsedResponse.answer;
     setMessages(prev => [...prev, { role: "ai", text: parsedResponse.question }]);
@@ -122,7 +122,7 @@ export default function Interview() {
     const prompt = `check the history and give just an interview question and answer in a json object string like {question: , answer:} 
                     for a ${context}, give just the object string and nothing else no mark down etc`
     setIsLoading(true);
-    const res = await sendTranscript(username, prompt);
+    const res = await sendResponse(username, prompt);
     const parsedResponse = JSON.parse(res.response);
     currentAnswer = parsedResponse.answer;
     setMessages(prev => [...prev, { role: "ai", text: parsedResponse.question }]);
@@ -135,7 +135,7 @@ export default function Interview() {
                            and this answer: ${answer}\n
                            output a score out of 10 and reason on a json object in the format {score: , reason: }
                            give just the object string and nothing else no mark down etc`
-    const res = await sendTranscript(username, checkAnswer);
+    const res = await sendResponse(username, checkAnswer);
     console.log(res.response);
     setMessages(prev => [...prev, { role: "user", text: answer }]);
     await handleQuestionSubmit()

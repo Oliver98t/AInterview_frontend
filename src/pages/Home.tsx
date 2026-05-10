@@ -96,7 +96,6 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button
             size="lg"
-            color="primary"
             variant="shadow"
             className="font-bold px-10 text-base glow-primary"
             onPress={() => navigate("/interview")}

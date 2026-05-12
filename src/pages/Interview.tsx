@@ -119,8 +119,7 @@ export default function Interview() {
   }, [context]);
 
   const handleQuestionSubmit = async () => {
-    const prompt = `check the history and give just an interview question and answer in a json object string like {question: , answer:} 
-                    for a ${context}, give just the object string and nothing else no mark down etc`
+    const prompt = `Check the history and output ONLY a single-line JSON object with the keys "question" and "answer" for a ${context}. Do NOT use triple backticks, do NOT use the word 'json', do NOT use any markdown or code block, and do NOT add any explanation. Only output the object.`
     setIsLoading(true);
     const res = await sendResponse(username, prompt);
     const parsedResponse = JSON.parse(res.response);
@@ -131,10 +130,9 @@ export default function Interview() {
 
   const handleAnswerSubmit = async (answer: string) => {
     console.log(messages[messages.length - 1]);
-    const checkAnswer =   `based on this question: ${messages[messages.length - 1].text}\n
-                           and this answer: ${answer}\n
-                           output a score out of 10 and reason on a json object in the format {score: , reason: }
-                           give just the object string and nothing else no mark down etc`
+    const checkAnswer = `Based on this question: ${messages[messages.length - 1].text}\n
+                         and this answer: ${answer}\n
+                         Output ONLY a single-line JSON object in the format with the keys "score" and "reason". Do NOT use triple backticks, do NOT use the word 'json', do NOT use any markdown or code block, and do NOT add any explanation. Only output the object.`
     const res = await sendResponse(username, checkAnswer);
     console.log(res.response);
     setMessages(prev => [...prev, { role: "user", text: answer }]);

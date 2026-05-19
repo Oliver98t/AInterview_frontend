@@ -89,7 +89,7 @@ function Reply({ initialValue = "", onSubmit }: ReplyProps) {
 
 export default function Interview() {
     const [messages, setMessages] = useState<message[]>([]);
-    const [step, setStep] = useState(STEP_QUESTION);
+    const [step, setStep] = useState(STEP_CONTEXT);
     const [username, setUsername] = useState("test");
     const [context, setContext] = useState("Python dev");
     const [aiResponse, setAiResponse] = useState("");
@@ -114,13 +114,15 @@ export default function Interview() {
 
     const handleContextSubmit = async () => {
         setStep(STEP_QUESTION);
+        const res = await sendResponse(username, "begin the interview", "answer");
     }
 
     const handleQuestionSubmit = async () => {
-        const style = "make approopriate length for a chatbox and display only the quesyion with no markdown"
-        const prompt = `Check the chat history and create an interview question for a: ${context}\nwith the style: ${style}`
+        const style = "make short length for a chatbox and display only the question with no markdown"
+        const difficulty = "easy"
+        const prompt = `Create an ${difficulty} difficulty interview question thats unique in terms of the topic in the chat history for a: ${context}\nwith the style: ${style}`
         setIsLoading(true);
-        const res = await sendResponse(username, prompt);
+        const res = await sendResponse(username, prompt, "question");
         console.log(res.response);
         setMessages(prev => [...prev, { role: "ai", text: res.response }]);
         setIsLoading(false);
@@ -128,9 +130,10 @@ export default function Interview() {
 
     const handleAnswerSubmit = async (answer: string) => {
         console.log(messages[messages.length - 1]);
-        const res = await sendResponse(username, answer);
+        const res = await sendResponse(username, answer, "answer");
         console.log(res.response);
         setMessages(prev => [...prev, { role: "user", text: answer }]);
+        await handleQuestionSubmit();
     };
 
     const handleRestart = useCallback(() => {

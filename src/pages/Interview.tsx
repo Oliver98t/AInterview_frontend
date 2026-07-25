@@ -34,6 +34,7 @@ type message = Record<string, string>;
 const STEP_USERNAME = 0;
 const STEP_CONTEXT = 1;
 const STEP_QUESTION = 2;
+const STEP_FINISH = 3;
 
 interface ReplyProps {
     initialValue?: string;
@@ -92,8 +93,9 @@ export default function Interview() {
     const [step, setStep] = useState(STEP_CONTEXT);
     const [username, setUsername] = useState("test");
     const [context, setContext] = useState("Python dev");
-    const [aiResponse, setAiResponse] = useState("");
+    const [results, setResult] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    let response_num = 0;
     let currentAnswer: string = "";
 
     // inside your component:
@@ -113,31 +115,39 @@ export default function Interview() {
     }, [username]);
 
     const handleContextSubmit = async () => {
+
+        await sendResponse(username, "null", "assistant", "clear", false);
+        const res = await sendResponse(username, "begin the interview", "user", "", false);
         setStep(STEP_QUESTION);
-        const res = await sendResponse(username, "begin the interview", "answer");
     }
 
     const handleQuestionSubmit = async () => {
         const style = "make short length for a chatbox and display only the question with no markdown"
-        const difficulty = "easy"
+        const difficulty = "medium"
         const prompt = `Create an ${difficulty} difficulty interview question thats unique in terms of the topic in the chat history for a: ${context}\nwith the style: ${style}`
         setIsLoading(true);
-        const res = await sendResponse(username, prompt, "question");
-        console.log(res.response);
+        const res = await sendResponse(username, prompt, "assistant", "", false);
+        console.log(res)
         setMessages(prev => [...prev, { role: "ai", text: res.response }]);
         setIsLoading(false);
+        response_num = res.response_num;
+        if(response_num > 5){
+            setMessages([]);
+            const res = await sendResponse(username, prompt, "assistant", "clear", true);
+            setResult(res.result)
+            console.log(res)
+            setStep(STEP_FINISH);
+        }
     };
 
     const handleAnswerSubmit = async (answer: string) => {
         console.log(messages[messages.length - 1]);
-        const res = await sendResponse(username, answer, "answer");
-        console.log(res.response);
+        const res = await sendResponse(username, answer, "user", "", false);
         setMessages(prev => [...prev, { role: "user", text: answer }]);
         await handleQuestionSubmit();
     };
 
     const handleRestart = useCallback(() => {
-        setAiResponse("");
         setUsername("");
         setStep(STEP_USERNAME);
     }, []);
@@ -232,7 +242,7 @@ export default function Interview() {
                                 color="primary"
                                 variant="shadow"
                                 onPress={handleContextSubmit}
-                                className="font-semibold w-full"
+                                className="rounded font-semibold w-full"
                                 size="lg"
                             >
                                 Continue →
@@ -292,6 +302,29 @@ export default function Interview() {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (step === STEP_FINISH) {
+        return (
+            <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
+                <div className="w-full max-w-2xl flex flex-col items-center gap-4">
+                    <h1 className="text-2xl font-bold text-center">Interview finished</h1>
+                    <ScrollShadow className="w-full">
+                        {results}
+                    </ScrollShadow>
+                    <Button
+                        color="primary"
+                        variant="shadow"
+                        onPress={handleUsernameSubmit}
+                        isDisabled={username.trim().length < 2}
+                        className="rounded font-semibold w-full"
+                        size="lg"
+                    >
+                        Finish →
+                    </Button>
                 </div>
             </div>
         );

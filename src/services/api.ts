@@ -9,10 +9,10 @@ const aws = new AwsClient({
 
 const responseUrl = import.meta.env.VITE_RESPONSE_DEV_URL as string;
 
-type SubmitType = "answer" | "question";
+type SubmitType = "user" | "assistant";
 
-export async function sendResponse(user: string, message: string, submitType: SubmitType ) {
-  const url = `${responseUrl}?user_name=${encodeURIComponent(user)}&message=${encodeURIComponent(message)}&type=${encodeURIComponent(submitType)}`;
+export async function sendResponse(user: string, message: string, role: SubmitType, clear: string, evaluate: boolean ) {
+  const url = `${responseUrl}?user_name=${encodeURIComponent(user)}&message=${encodeURIComponent(message)}&role=${encodeURIComponent(role)}&clear_db=${encodeURIComponent(clear)}&eval=${encodeURIComponent(evaluate)}`;
   const res = await aws.fetch(url, { method: "GET" });
   if (!res.ok) throw new Error("Failed to send transcript");
   return res.json();

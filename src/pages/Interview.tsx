@@ -23,6 +23,7 @@ import useAudioRecorder from "../hooks/useAudioRecorder";
 import {
     sendResponse
 } from "../services/api";
+import { useAuth } from "react-oidc-context";
 
 // TODO implement feedback assessment (finish interview button)
 
@@ -89,6 +90,7 @@ function Reply({ initialValue = "", onSubmit }: ReplyProps) {
 }
 
 export default function Interview() {
+    const auth = useAuth();
     const [messages, setMessages] = useState<message[]>([]);
     const [step, setStep] = useState(STEP_CONTEXT);
     const [username, setUsername] = useState("test");
@@ -97,6 +99,14 @@ export default function Interview() {
     const [isLoading, setIsLoading] = useState(false);
     let response_num = 0;
     let currentAnswer: string = "";
+
+    const getAccessToken = () => {
+        const token = auth.user?.access_token;
+        if (!token) {
+            throw new Error("Missing access token");
+        }
+        return token;
+    };
 
     // inside your component:
     useEffect(() => {
@@ -116,8 +126,8 @@ export default function Interview() {
 
     const handleContextSubmit = async () => {
 
-        await sendResponse(username, "null", "assistant", "clear", false);
-        const res = await sendResponse(username, "begin the interview", "user", "", false);
+        await sendResponse(username, "null", "assistant", "clear", false, getAccessToken());
+        const res = await sendResponse(username, "begin the interview", "user", "", false, getAccessToken());
         setStep(STEP_QUESTION);
     }
 
@@ -126,14 +136,14 @@ export default function Interview() {
         const difficulty = "medium"
         const prompt = `Create an ${difficulty} difficulty interview question thats unique in terms of the topic in the chat history for a: ${context}\nwith the style: ${style}`
         setIsLoading(true);
-        const res = await sendResponse(username, prompt, "assistant", "", false);
+        const res = await sendResponse(username, prompt, "assistant", "", false, getAccessToken());
         console.log(res)
         setMessages(prev => [...prev, { role: "ai", text: res.response }]);
         setIsLoading(false);
         response_num = res.response_num;
         if(response_num > 5){
             setMessages([]);
-            const res = await sendResponse(username, prompt, "assistant", "clear", true);
+            const res = await sendResponse(username, prompt, "assistant", "clear", true, getAccessToken());
             setResult(res.result)
             console.log(res)
             setStep(STEP_FINISH);
@@ -142,7 +152,7 @@ export default function Interview() {
 
     const handleAnswerSubmit = async (answer: string) => {
         console.log(messages[messages.length - 1]);
-        const res = await sendResponse(username, answer, "user", "", false);
+        const res = await sendResponse(username, answer, "user", "", false, getAccessToken());
         setMessages(prev => [...prev, { role: "user", text: answer }]);
         await handleQuestionSubmit();
     };

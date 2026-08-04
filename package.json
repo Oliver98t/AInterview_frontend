@@ -14,8 +14,10 @@
     "aws4fetch": "^1.0.20",
     "axios": "^1.7.2",
     "framer-motion": "^11.2.10",
+    "oidc-client-ts": "^3.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-oidc-context": "^3.3.1",
     "react-router-dom": "^6.23.1"
   },
   "devDependencies": {

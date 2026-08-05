@@ -29,10 +29,6 @@ export function AuthButton() {
   }
 
   if (auth.isAuthenticated) {
-    console.log(auth.user?.profile.email);
-    console.log(auth.user?.id_token);
-    console.log(auth.user?.access_token);
-    console.log(auth.user?.refresh_token)
     return (
       <div>
         <pre> Hello: {auth.user?.profile.email} </pre>

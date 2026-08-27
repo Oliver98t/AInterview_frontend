@@ -36,6 +36,9 @@ jobs:
 
             - name: Run unit tests
               run: pnpm test
-            
+              
+            - name: Set up Terraform
+              uses: hashicorp/setup-terraform@v3
+
             - name: deploy dev
               run: source deploy.sh dev

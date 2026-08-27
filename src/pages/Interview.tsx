@@ -26,6 +26,7 @@ import {
 import { useAuth } from "react-oidc-context";
 
 // TODO implement feedback assessment (finish interview button)
+// TODO tidy up feedback presentation
 
 const LOCAL_TEST = import.meta.env.VITE_LOCAL_TEST as boolean;
 

@@ -20,7 +20,6 @@ interface NavLink {
 const navLinks: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Interview", href: "/interview" },
-  { label: "Settings", href: "/settings" },
 ];
 
 export default function AppNavbar() {

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { useAuth } from "react-oidc-context";
 import AppNavbar from "./components/AppNavbar";
 import Home from "./pages/Home";
@@ -17,39 +17,35 @@ const cognitoAuthConfig = {
   scope: "email openid profile",
 };
 
-function AppRoutes() {
+function RequireAuth() {
   const auth = useAuth();
-
-  if (auth.isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div>Loading...</div>
-      </div>
-    );
-  }
-
-  if (!auth.isAuthenticated) {
-    return <Login />;
-  }
-
+  if (auth.isLoading) return <div>Loading...</div>;
+  if (!auth.isAuthenticated) return <Login />;
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <>
       <AppNavbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/interview" element={<Interview />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/callback" element={<Callback />} />
-        <Route path="/logout" element={<Logout />} />
-      </Routes>
-    </div>
+      <Outlet />   {/* renders the matched child route */}
+    </>
   );
 }
 
 export default function App() {
   return (
     <AuthProvider {...cognitoAuthConfig}>
-      <AppRoutes />
+      <div className="min-h-screen bg-[#0a0a0f]">
+        <Routes>
+          {/* public */}
+          <Route path="/" element={<Home />} />
+          <Route path="/callback" element={<Callback />} />
+          <Route path="/logout" element={<Logout />} />
+
+          {/* protected — wrapped in auth guard */}
+          <Route element={<RequireAuth />}>
+            <Route path="/interview" element={<Interview />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+        </Routes>
+      </div>
     </AuthProvider>
   );
 }

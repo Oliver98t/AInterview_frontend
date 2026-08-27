@@ -73,7 +73,6 @@ export default function Home() {
   return (
     <div className="relative overflow-hidden">
       {/* Background decorations */}
-      <AuthButton/>
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
         <div className="absolute bottom-[10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-secondary/5 blur-[120px]" />

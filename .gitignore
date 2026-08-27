@@ -1,6 +1,12 @@
 # Dependencies
 node_modules/
 
+# Terraform
+.terraform/
+**/.terraform/
+*.tfstate
+*.tfstate.*
+
 # Build output
 dist/
 dist-ssr/

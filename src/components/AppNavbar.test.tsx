@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import AppNavbar from "./AppNavbar";
 
+jest.mock("./Auth", () => ({
+  AuthButton: () => <button>Sign out</button>,
+}));
+
 describe("AppNavbar", () => {
   it("renders the application navigation", () => {
     render(

@@ -6,7 +6,6 @@ import {
     CardHeader,
     Input,
     Progress,
-    Spinner,
     Chip,
     Divider,
     Modal,
@@ -98,6 +97,8 @@ export default function Interview() {
     const [context, setContext] = useState("Python dev");
     const [results, setResult] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isStartingInterview, setIsStartingInterview] = useState(false);
+    const [isFetchingResults, setIsFetchingResults] = useState(false);
     let response_num = 0;
     let currentAnswer: string = "";
 
@@ -126,9 +127,10 @@ export default function Interview() {
     }, [username]);
 
     const handleContextSubmit = async () => {
-
+        setIsStartingInterview(true);
         await sendResponse(username, "null", "assistant", "clear", false, getAccessToken());
         const res = await sendResponse(username, "begin the interview", "user", "", false, getAccessToken());
+        setIsStartingInterview(false);
         setStep(STEP_QUESTION);
     }
 
@@ -144,9 +146,11 @@ export default function Interview() {
         response_num = res.response_num;
         if(response_num > 5){
             setMessages([]);
+            setIsFetchingResults(true);
             const res = await sendResponse(username, prompt, "assistant", "clear", true, getAccessToken());
             setResult(res.result)
             console.log(res)
+            setIsFetchingResults(false);
             setStep(STEP_FINISH);
         }
     };
@@ -162,6 +166,38 @@ export default function Interview() {
         setUsername("");
         setStep(STEP_USERNAME);
     }, []);
+
+    if (isFetchingResults) {
+        return (
+            <div
+                className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 px-4"
+                aria-live="polite"
+            >
+                <div
+                    className="h-12 w-12 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"
+                    role="status"
+                    aria-label="Loading"
+                />
+                <p className="text-default-400">Preparing your interview results...</p>
+            </div>
+        );
+    }
+
+    if (isStartingInterview) {
+        return (
+            <div
+                className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 px-4"
+                aria-live="polite"
+            >
+                <div
+                    className="h-12 w-12 animate-spin rounded-full border-4 border-primary-500 border-t-transparent"
+                    role="status"
+                    aria-label="Loading"
+                />
+                <p className="text-default-400">Starting your interview...</p>
+            </div>
+        );
+    }
 
     // --- Step: Username ---
     if (step === STEP_USERNAME) {
@@ -215,7 +251,9 @@ export default function Interview() {
     // --- Step: set context of interview ---
     if (step === STEP_CONTEXT) {
         return (
+            
             <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4">
+
                 <div className="w-full max-w-md mx-auto px-6 py-12">
                     <div className="mb-8">
                         <div className="flex items-center gap-3 mb-2">
@@ -254,7 +292,7 @@ export default function Interview() {
                                 variant="shadow"
                                 onPress={handleContextSubmit}
                                 className="rounded font-semibold w-full"
-                                size="lg"
+                                size="md"
                             >
                                 Continue →
                             </Button>
@@ -332,7 +370,7 @@ export default function Interview() {
                         onPress={handleUsernameSubmit}
                         isDisabled={username.trim().length < 2}
                         className="rounded font-semibold w-full"
-                        size="lg"
+                        size="md"
                     >
                         Finish →
                     </Button>

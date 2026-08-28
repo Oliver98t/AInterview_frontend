@@ -1,6 +1,10 @@
 // App.js
 
 import { useAuth } from "react-oidc-context";
+import { Button } from "@heroui/react";
+
+const authButtonClassName =
+  "px-3 py-1.5 rounded-lg text-sm font-medium transition-colors text-default-400 hover:text-foreground hover:bg-white/5";
 
 export function AuthButton() {
   const auth = useAuth();
@@ -30,17 +34,22 @@ export function AuthButton() {
 
   if (auth.isAuthenticated) {
     return (
-      <div>
-        <pre> Hello: {auth.user?.profile.email} </pre>
-        <button onClick={signOutRedirect}>Sign out</button>
+      <div className="flex items-center gap-1">
+        <span className={authButtonClassName}>
+          {auth.user?.profile.email}
+        </span>
+        <Button className={authButtonClassName} onPress={signOutRedirect}>
+          Sign out
+        </Button>
       </div>
     );
   }
 
   return (
-    <div>
-      <button onClick={() => handleSignIn()}>Sign in</button>
-      <button onClick={() => signOutRedirect()}>Sign out</button>
+    <div className="flex items-center gap-1">
+      <Button className={authButtonClassName} onPress={handleSignIn}>
+        Sign in
+      </Button>
     </div>
   );
 }

@@ -8,7 +8,7 @@ export default function Callback() {
 
   useEffect(() => {
     if (auth.isAuthenticated) {
-      navigate("/");
+      navigate("/interview");
     }
   }, [auth.isAuthenticated, navigate]);
 

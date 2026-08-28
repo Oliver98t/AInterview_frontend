@@ -6,7 +6,6 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  Button,
   Link,
 } from "@heroui/react";
 import { AuthButton } from "./Auth"
@@ -35,7 +34,6 @@ export default function AppNavbar() {
       className="bg-[#0d0d14]/80 backdrop-blur-xl border-b border-white/[0.06]"
       maxWidth="xl"
     >
-      <AuthButton/>
       {/* Brand */}
       <NavbarContent>
         <NavbarMenuToggle
@@ -91,6 +89,12 @@ export default function AppNavbar() {
           </NavbarMenuItem>
         ))}
       </NavbarMenu>
+
+      <NavbarContent justify="end" className="ml-auto flex-none">
+        <NavbarItem>
+          <AuthButton />
+        </NavbarItem>
+      </NavbarContent>
     </Navbar>
   );
 }

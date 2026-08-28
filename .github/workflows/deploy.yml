@@ -44,3 +44,4 @@ jobs:
 
             - name: deploy dev
               run: source deploy.sh dev
+            # TODO add integration test and deploy to prod

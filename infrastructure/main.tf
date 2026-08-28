@@ -1,5 +1,3 @@
-# TODO - add pipeline
-# TODO - setup dev, prod envs
 
 locals {
   name_prefix       = "${var.project_name}-${var.environment}"

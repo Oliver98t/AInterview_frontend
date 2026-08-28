@@ -1,6 +1,13 @@
 terraform {
   required_version = ">= 1.6"
 
+  backend "s3" {
+    bucket  = ""
+    key     = ""
+    region  = ""
+    encrypt = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"

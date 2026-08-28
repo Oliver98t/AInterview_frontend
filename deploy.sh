@@ -14,10 +14,20 @@ fi
 echo "==> Reading Terraform outputs for environment: $env"
 cd infrastructure/
 
+# backend config
+BUCKET=ainterview-state-files   
+KEY=state/terraform_FE_$env.tfstate      
+REGION=eu-west-2                     
+ENCRYPT=true
+
+terraform init -reconfigure \
+    -backend-config="bucket=$BUCKET" \
+    -backend-config="key=$KEY" \
+    -backend-config="region=$REGION" \
+    -backend-config="encrypt=$ENCRYPT"
 
 terraform apply -auto-approve \
     -var="environment=$env"
-
 
 BUCKET=$(terraform output -raw s3_bucket_name)
 CF_ID=$(terraform output -raw cloudfront_distribution_id)

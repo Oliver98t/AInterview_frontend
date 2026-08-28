@@ -9,6 +9,7 @@ import {
   Button,
   Link,
 } from "@heroui/react";
+import { AuthButton } from "./Auth"
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -34,6 +35,7 @@ export default function AppNavbar() {
       className="bg-[#0d0d14]/80 backdrop-blur-xl border-b border-white/[0.06]"
       maxWidth="xl"
     >
+      <AuthButton/>
       {/* Brand */}
       <NavbarContent>
         <NavbarMenuToggle

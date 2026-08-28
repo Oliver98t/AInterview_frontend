@@ -1,9 +1,8 @@
 # TODO - add pipeline
 # TODO - setup dev, prod envs
-# TODO - store state file in s3 bucket
 
 locals {
-  name_prefix     = "${var.project_name}-${var.environment}"
+  name_prefix       = "${var.project_name}-${var.environment}"
   use_custom_domain = var.domain_name != ""
 }
 

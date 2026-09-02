@@ -5,54 +5,35 @@ on:
     branches: ["main"]
 
 jobs:
-  deploy:
+  deploy-dev:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - env_name: dev
-            aws_region: eu-west-2
-            vite_local_test_var: VITE_LOCAL_TEST
-            vite_response_url_var: VITE_RESPONSE_DEV_URL
-          - env_name: prod
-            aws_region: eu-west-2
-            vite_local_test_var: VITE_LOCAL_TEST
-            vite_response_url_var: VITE_RESPONSE_PROD_URL
-
-    environment: ${{ matrix.env_name }}
+    environment: dev
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      VITE_LOCAL_TEST: ${{ vars[matrix.vite_local_test_var] }}
-      VITE_RESPONSE_DEV_URL: ${{ vars[matrix.vite_response_url_var] }}
+      VITE_LOCAL_TEST: ${{ vars.VITE_LOCAL_TEST }}
+      VITE_RESPONSE_DEV_URL: ${{ vars.VITE_RESPONSE_DEV_URL }}
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
+      - name: Deploy dev
+        uses: ./.github/actions/deploy
         with:
-          version: 10
+          environment: dev
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2
 
-      - name: Set up Node.js 20.20.2
-        uses: actions/setup-node@v4
+  deploy-prod:
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      VITE_LOCAL_TEST: ${{ vars.VITE_LOCAL_TEST }}
+      VITE_RESPONSE_DEV_URL: ${{ vars.VITE_RESPONSE_PROD_URL }}
+
+    steps:
+      - name: Deploy prod
+        uses: ./.github/actions/deploy
         with:
-          node-version: 20.20.2
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ matrix.aws_region }}
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Deploy
-        run: source deploy.sh ${{ matrix.env_name }}
+          environment: prod
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-2

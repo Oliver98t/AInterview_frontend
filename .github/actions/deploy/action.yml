@@ -17,8 +17,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@v4
-
     - name: Set up pnpm
       uses: pnpm/action-setup@v4
       with:
@@ -33,6 +31,10 @@ runs:
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile
+
+    - name: unit test
+      shell: bash
+      run: pnpm test
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4

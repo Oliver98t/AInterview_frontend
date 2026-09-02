@@ -8,11 +8,10 @@ import Callback from "./pages/Callback";
 import Logout from "./pages/Logout";
 import Login from "./pages/Login";
 import { AuthProvider } from "react-oidc-context";
-import { appEnv } from "./config/env";
 
 const cognitoAuthConfig = {
-  authority: appEnv.VITE_COGNITO_AUTHORITY as string,
-  client_id: appEnv.VITE_AUTH0_CLIENT_ID as string,
+  authority: import.meta.env.VITE_COGNITO_AUTHORITY as string,
+  client_id: import.meta.env.VITE_AUTH0_CLIENT_ID as string,
   redirect_uri: `${window.location.origin}/callback`,
   response_type: "code",
   scope: "email openid profile",

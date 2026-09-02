@@ -23,12 +23,11 @@ import {
     sendResponse
 } from "../services/api";
 import { useAuth } from "react-oidc-context";
-import { appEnv } from "../config/env";
 
 // TODO implement feedback assessment (finish interview button)
 // TODO tidy up feedback presentation
 
-const LOCAL_TEST = appEnv.VITE_LOCAL_TEST as boolean;
+const LOCAL_TEST = import.meta.env.VITE_LOCAL_TEST as boolean;
 
 type message = Record<string, string>;
 

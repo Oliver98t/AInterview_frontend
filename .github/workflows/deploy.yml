@@ -10,7 +10,7 @@ jobs:
     environment: dev
     env:
       VITE_LOCAL_TEST: ${{ vars.VITE_LOCAL_TEST }}
-      VITE_RESPONSE_DEV_URL: ${{ vars.VITE_RESPONSE_DEV_URL }}
+      VITE_RESPONSE_URL: ${{ vars.VITE_RESPONSE_URL }}
 
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
     environment: prod
     env:
       VITE_LOCAL_TEST: ${{ vars.VITE_LOCAL_TEST }}
-      VITE_RESPONSE_DEV_URL: ${{ vars.VITE_RESPONSE_PROD_URL }}
+      VITE_RESPONSE_URL: ${{ vars.VITE_RESPONSE_URL }}
 
     steps:
       - uses: actions/checkout@v4

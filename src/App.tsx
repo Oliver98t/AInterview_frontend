@@ -10,8 +10,8 @@ import Login from "./pages/Login";
 import { AuthProvider } from "react-oidc-context";
 
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_DYeZceIQR",
-  client_id: "5u4vv64b2r4lr2v7de4ta1i4ac",
+  authority: import.meta.env.VITE_COGNITO_AUTHORITY as string,
+  client_id: import.meta.env.VITE_AUTH0_CLIENT_ID as string,
   redirect_uri: `${window.location.origin}/callback`,
   response_type: "code",
   scope: "email openid profile",

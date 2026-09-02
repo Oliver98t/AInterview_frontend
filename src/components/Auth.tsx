@@ -18,9 +18,9 @@ export function AuthButton() {
   const signOutRedirect = () => {
     sessionStorage.clear(); 
     localStorage.clear();
-    const clientId = "5u4vv64b2r4lr2v7de4ta1i4ac";
+    const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID as string;
     const logoutUri = `${window.location.origin}/logout`;
-    const cognitoDomain = "https://ainterview-dev-eu-west-2.auth.eu-west-2.amazoncognito.com";
+    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN as string;
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
 

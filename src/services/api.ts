@@ -1,4 +1,6 @@
-const responseUrl = import.meta.env.VITE_RESPONSE_URL as string;
+import { appEnv } from "../config/env";
+
+const responseUrl = appEnv.VITE_RESPONSE_URL as string;
 
 type SubmitType = "user" | "assistant";
 export async function sendResponse(

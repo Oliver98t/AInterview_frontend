@@ -1,6 +1,7 @@
 // App.js
 
 import { useAuth } from "react-oidc-context";
+import { appEnv } from "../config/env";
 import { Button } from "@heroui/react";
 
 const authButtonClassName =
@@ -18,9 +19,9 @@ export function AuthButton() {
   const signOutRedirect = () => {
     sessionStorage.clear(); 
     localStorage.clear();
-    const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID as string;
+    const clientId = appEnv.VITE_AUTH0_CLIENT_ID as string;
     const logoutUri = `${window.location.origin}/logout`;
-    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN as string;
+    const cognitoDomain = appEnv.VITE_COGNITO_DOMAIN as string;
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
 

@@ -15,3 +15,7 @@ interface ImportMetaEnv {
 interface ImportMeta {
 	readonly env: ImportMetaEnv;
 }
+
+declare global {
+    var __APP_ENV__: import("./config/env").AppEnv | undefined;
+}

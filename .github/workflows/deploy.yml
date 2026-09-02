@@ -1,47 +1,58 @@
 name: Deploy
 
 on:
-    push:
-        branches: [ "main" ]
+  push:
+    branches: ["main"]
 
 jobs:
-    Deployment:
-        runs-on: ubuntu-latest
-        env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            VITE_LOCAL_TEST: ${{ vars.VITE_LOCAL_TEST }}
-            VITE_RESPONSE_DEV_URL: ${{ vars.VITE_RESPONSE_DEV_URL }}
-        steps:
-            - uses: actions/checkout@v4
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - env_name: dev
+            aws_region: eu-west-2
+            vite_local_test_var: VITE_LOCAL_TEST
+            vite_response_url_var: VITE_RESPONSE_DEV_URL
+          - env_name: prod
+            aws_region: eu-west-2
+            vite_local_test_var: VITE_LOCAL_TEST
+            vite_response_url_var: VITE_RESPONSE_PROD_URL
 
-            - name: Set up pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
+    environment: ${{ matrix.env_name }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      VITE_LOCAL_TEST: ${{ vars[matrix.vite_local_test_var] }}
+      VITE_RESPONSE_DEV_URL: ${{ vars[matrix.vite_response_url_var] }}
 
-            - name: Set up Node.js 20.20.2
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 20.20.2
-                  cache: pnpm
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
-            - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@v4
-              with:
-                  aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
-                  aws-region: eu-west-2
+      - name: Set up Node.js 20.20.2
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.20.2
+          cache: pnpm
 
-            - name: Run unit tests
-              run: pnpm test
-              
-            - name: Set up Terraform
-              uses: hashicorp/setup-terraform@v3
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-            - name: deploy dev
-              run: source deploy.sh dev
-            # TODO add integration test and deploy to prod
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ matrix.aws_region }}
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Deploy
+        run: source deploy.sh ${{ matrix.env_name }}

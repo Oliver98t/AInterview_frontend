@@ -6,8 +6,8 @@
 set -euo pipefail
 
 env=$1
-if [[ "$env" != "dev" && "$env" != "prod" ]]; then
-  echo "env must be dev or prod"
+if [[ "$env" != "dev" && "$env" != "staging" && "$env" != "prod" ]]; then
+  echo "env must be dev, staging, or prod"
   exit 1
 fi
 

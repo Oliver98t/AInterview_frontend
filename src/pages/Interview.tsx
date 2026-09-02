@@ -31,6 +31,26 @@ const LOCAL_TEST = import.meta.env.VITE_LOCAL_TEST as boolean;
 
 type message = Record<string, string>;
 
+interface QuestionResult {
+    expected_answer: string;
+    score: number;
+}
+
+interface EvaluationResult {
+    [key: string]: QuestionResult | { comment: string; score: number } | undefined;
+    overall_evaluation?: { comment: string; score: number };
+}
+
+// Strips optional ```json fences and parses the evaluation result string into an object.
+function parseEvaluationResult(raw: string): EvaluationResult | null {
+    const cleaned = raw.trim().replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+    try {
+        return JSON.parse(cleaned);
+    } catch {
+        return null;
+    }
+}
+
 // Step indices
 const STEP_USERNAME = 0;
 const STEP_CONTEXT = 1;
@@ -93,14 +113,13 @@ export default function Interview() {
     const auth = useAuth();
     const [messages, setMessages] = useState<message[]>([]);
     const [step, setStep] = useState(STEP_CONTEXT);
-    const [username, setUsername] = useState("test");
+    const [username, setUsername] = useState("test"); // TODO replace with username derived from auth token
     const [context, setContext] = useState("Python dev");
     const [results, setResult] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isStartingInterview, setIsStartingInterview] = useState(false);
     const [isFetchingResults, setIsFetchingResults] = useState(false);
     let response_num = 0;
-    let currentAnswer: string = "";
 
     const getAccessToken = () => {
         const token = auth.user?.access_token;
@@ -149,6 +168,7 @@ export default function Interview() {
             setIsFetchingResults(true);
             const res = await sendResponse(username, prompt, "assistant", "clear", true, getAccessToken());
             setResult(res.result)
+            console.log(res.result)
             console.log(res)
             setIsFetchingResults(false);
             setStep(STEP_FINISH);
@@ -357,12 +377,46 @@ export default function Interview() {
     }
 
     if (step === STEP_FINISH) {
+        const evaluation = parseEvaluationResult(results);
         return (
             <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
                 <div className="w-full max-w-2xl flex flex-col items-center gap-4">
                     <h1 className="text-2xl font-bold text-center">Interview finished</h1>
-                    <ScrollShadow className="w-full">
-                        {results}
+                    <ScrollShadow className="w-full max-h-[60vh]">
+                        {evaluation ? (
+                            <div className="flex flex-col gap-4 w-full">
+                                {Object.entries(evaluation)
+                                    .filter(([key]) => key !== "overall_evaluation")
+                                    .map(([key, value]) => (
+                                        <div key={key} className="card-glass border-white/[0.06] rounded-2xl p-4 flex flex-col gap-1">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-semibold capitalize">{key.replace(/_/g, " ")}</span>
+                                                <Chip size="sm" color="primary" variant="flat">
+                                                    Score: {(value as QuestionResult).score}
+                                                </Chip>
+                                            </div>
+                                            <p className="text-default-400 text-sm">
+                                                {(value as QuestionResult).expected_answer}
+                                            </p>
+                                        </div>
+                                    ))}
+                                {evaluation.overall_evaluation && (
+                                    <div className="card-glass border-white/[0.06] rounded-2xl p-4 flex flex-col gap-1 bg-primary/10">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-semibold">Overall evaluation</span>
+                                            <Chip size="sm" color="primary" variant="flat">
+                                                Score: {evaluation.overall_evaluation.score}
+                                            </Chip>
+                                        </div>
+                                        <p className="text-default-400 text-sm">
+                                            {evaluation.overall_evaluation.comment}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            results
+                        )}
                     </ScrollShadow>
                     <Button
                         color="primary"

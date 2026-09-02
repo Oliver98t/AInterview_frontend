@@ -32,9 +32,9 @@ runs:
       shell: bash
       run: pnpm install --frozen-lockfile
 
-    - name: unit test
-      shell: bash
-      #run: pnpm test
+    # - name: unit test
+    #   shell: bash
+    #   #run: pnpm test
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
